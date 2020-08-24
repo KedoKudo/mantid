@@ -31,6 +31,7 @@ Improvements
 Bugfixes
 ^^^^^^^^
 - The fourier filter on Polaris.create_total_scattering_pdf no longer produces a jagged mark at the cut off point.
+- Dummy detectors from Polaris data no longer prevent unit conversion.
 
 Engineering Diffraction
 -----------------------
