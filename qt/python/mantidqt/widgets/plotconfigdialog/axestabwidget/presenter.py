@@ -203,7 +203,8 @@ class AxesTabWidgetPresenter:
         self.view.show_minor_gridlines_check_box.setVisible(not plot_is_3d)
         self.view.show_minor_ticks_check_box.setVisible(not plot_is_3d)
 
-        ax = self.view.get_axis()
+        # On Kubuntu, QT prepends the & on characters used as shortcut keys, which causes KeyErrors
+        ax = self.current_axis.replace('&', '')
         self.view.set_title(ax_props.title)
 
         if not plot_is_3d:
@@ -220,7 +221,8 @@ class AxesTabWidgetPresenter:
         self.current_view_props.update(self.view.get_properties())
 
     def axis_changed(self):
-        ax = self.current_axis
+        # On Kubuntu, QT prepends the & on characters used as shortcut keys, which causes KeyErrors
+        ax = self.current_axis.replace('&', '')
 
         self.current_view_props['title'] = self.view.get_title()
         self.current_view_props['minor_ticks'] = self.view.get_show_minor_ticks()
