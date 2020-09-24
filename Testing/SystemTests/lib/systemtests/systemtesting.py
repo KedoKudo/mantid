@@ -1139,6 +1139,15 @@ class MantidFrameworkConfig:
     testDir = property(lambda self: self.__testDir)
     dataDir = property(lambda self: self.__dataDirs)
 
+    def setTestSubDirectory(self, sub_directory):
+        self.__testSubDir = sub_directory
+
+        # add location of system tests
+        self.__testDir = self.__locateTestsDir()
+
+        # add location of the tests to the system path
+        sys.path.insert(0, self.__testDir)
+
     def config(self):
         # backup the existing user properties so we can step all over it
         self.__userPropsFile = config.getUserFilename()
