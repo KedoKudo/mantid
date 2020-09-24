@@ -187,7 +187,7 @@ def run_all_tests(mtdconf, options, test_sub_directories):
 def main():
     info = [
         "This program will configure mantid run all of the system tests located in",
-        "the 'tests/<sub_dir>' directory.",
+        "the 'tests/<sub_directory>' directory.",
         "This program will create a temporary 'Mantid.user.properties' file which",
         "it will rename to 'Mantid.user.properties.systest' upon completion. The",
         "current version of the code does not print to stdout while the test is",
@@ -337,7 +337,7 @@ def main():
         if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
             os.remove(os.path.join(mtdconf.saveDir, file))
 
-    success, all_tests, status_dict, skipped_tests, failed_tests, total_tests = run_all_tests(mtdconf, options,
+    success, test_list, status_dict, skipped_tests, failed_tests, total_tests = run_all_tests(mtdconf, options,
                                                                                               ["framework", "qt"])
 
     #########################################################################
@@ -357,7 +357,7 @@ def main():
     if options.dry_run:
         print()
         print("Tests that would be executed:")
-        for suites in all_tests.values():
+        for suites in test_list.values():
             for suite in suites:
                 print('  ' + suite.name)
     elif not options.clean:

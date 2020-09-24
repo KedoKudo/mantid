@@ -854,7 +854,7 @@ class TestManager(object):
         # with data being cleaned up before another process has finished.
         #
         # We create a list of test modules (= different python files in the
-        # 'Testing/SystemTests/tests/<sub_dir>' directory) and count how many
+        # 'Testing/SystemTests/tests/<sub_directory>' directory) and count how many
         # tests are in each module. We also create on the fly a list of tests
         # for each module.
         modcounts = dict()
@@ -899,8 +899,8 @@ class TestManager(object):
 
             fname = modkey + ".py"
             files_required_by_test_module[modkey] = []
-            sub_dir = self._testDir.split("\\")[-1]
-            with open(os.path.join(os.path.dirname(self._testDir), sub_dir, fname), "r") as pyfile:
+            sub_directory = self._testDir.split("\\")[-1]
+            with open(os.path.join(os.path.dirname(self._testDir), sub_directory, fname), "r") as pyfile:
                 for line in pyfile.readlines():
 
                     # Search for all instances of '.nxs' or '.raw'
