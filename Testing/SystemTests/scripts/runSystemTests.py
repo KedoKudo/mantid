@@ -9,7 +9,6 @@ import argparse
 import os
 import sys
 import time
-import systemtesting
 from multiprocessing import Process, Array, Manager, Value, Lock
 
 # Prevents erros in systemtests that use matplotlib directly
@@ -34,13 +33,14 @@ def kill_children(processes):
     sys.exit(1)
 
 
-def generate_list_of_tests(mtdconfig, options):
+def generate_list_of_tests(mtdconf, options):
+    import systemtesting
     runner = systemtesting.TestRunner(executable=options.executable,
                                       # see InstallerTests.py for why lstrip is required
                                       exec_args=options.execargs.lstrip(),
                                       escape_quotes=True)
 
-    test_manager = systemtesting.TestManager(test_loc=mtdconfig.testDir,
+    test_manager = systemtesting.TestManager(test_loc=mtdconf.testDir,
                                              runner=runner,
                                              quiet=options.quiet,
                                              testsInclude=options.testsInclude,
@@ -53,16 +53,7 @@ def generate_list_of_tests(mtdconfig, options):
 
 def run_tests(mtdconf, options, number_of_test_modules, files_required_by_test_module, data_file_lock_status,
               test_counts, test_list, test_stats, total_number_of_tests, maximum_name_length):
-    # Print message if this is a cleanup run instead of a normal test run
-    if options.clean:
-        print("Performing cleanup run")
-
-    # Cleanup any pre-existing XML reporter files
-    entries = os.listdir(mtdconf.saveDir)
-    for file in entries:
-        if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
-            os.remove(os.path.join(mtdconf.saveDir, file))
-
+    import systemtesting
     if not options.dry_run:
         # Multi-core processes --------------
         # An array to hold the processes
@@ -163,6 +154,34 @@ def generate_and_run_tests(mtdconf, options):
                                                                                maximum_name_length)
 
     return test_list, status_dict, skipped_tests, failed_tests, total_tests, success
+
+
+def run_all_tests(mtdconf, options, test_sub_directories):
+    all_success = True
+    all_tests = dict()
+    all_statuses = dict()
+    skipped_count = 0
+    failed_count = 0
+    total_test_count = 0
+
+    # Generate and run system tests in all system test sub directories
+    for sub_directory in test_sub_directories:
+        # Set the sub directory of the next system tests to run
+        mtdconf.setTestDirectory(sub_directory)
+
+        # Generate a list of tests in the sub directory and run them
+        test_list, status_dict, skipped_tests, failed_tests, total_tests, success = generate_and_run_tests(mtdconf,
+                                                                                                           options)
+
+        # Gather cumulative test statistics
+        all_success = all_success and success
+        all_tests.update(test_list)
+        all_statuses.update(status_dict)
+        skipped_count += skipped_tests
+        failed_count += failed_tests
+        total_test_count += total_tests
+
+    return all_success, all_tests, all_statuses, skipped_count, failed_count, total_test_count
 
 
 def main():
@@ -276,6 +295,7 @@ def main():
 
     # import the system testing framework
     sys.path.append(options.frameworkLoc)
+    import systemtesting
 
     # allow PythonInterface/test to be discoverable
     sys.path.append(systemtesting.FRAMEWORK_PYTHONINTERFACE_TEST_DIR)
@@ -297,7 +317,6 @@ def main():
 
     # Configure properties file
     mtdconf = systemtesting.MantidFrameworkConfig(loglevel=options.loglevel,
-                                                  test_sub_dir="framework",
                                                   data_dirs=data_paths,
                                                   save_dir=save_dir,
                                                   archivesearch=options.archivesearch)
@@ -308,21 +327,18 @@ def main():
     # Generate and run system tests in framework and qt sub directories
     #########################################################################
 
-    # Generate and run system tests in the "framework" sub directory
-    test_list1, status_dict1, skipped_tests1, failed_tests1, total_tests1, success1 = generate_and_run_tests(mtdconf,
-                                                                                                             options)
-    # Set a new test sub directory
-    mtdconf.setTestSubDirectory("qt")
+    # Print message if this is a cleanup run instead of a normal test run
+    if options.clean:
+        print("Performing cleanup run")
 
-    # Generate and run system tests in the "qt" sub directory
-    test_list2, status_dict2, skipped_tests2, failed_tests2, total_tests2, success2 = generate_and_run_tests(mtdconf,
-                                                                                                             options)
-    all_tests = {**test_list1, **test_list2}
-    status_dict = {**status_dict1, **status_dict2}
-    skipped_tests = skipped_tests1 + skipped_tests2
-    failed_tests = failed_tests1 + failed_tests2
-    total_tests = total_tests1 + total_tests2
-    success = success1 and success2
+    # Cleanup any pre-existing XML reporter files
+    entries = os.listdir(mtdconf.saveDir)
+    for file in entries:
+        if file.startswith('TEST-systemtests-') and file.endswith('.xml'):
+            os.remove(os.path.join(mtdconf.saveDir, file))
+
+    success, all_tests, status_dict, skipped_tests, failed_tests, total_tests = run_all_tests(mtdconf, options,
+                                                                                              ["framework", "qt"])
 
     #########################################################################
     # Cleanup

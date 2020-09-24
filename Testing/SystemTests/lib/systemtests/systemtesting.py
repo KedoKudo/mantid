@@ -1058,20 +1058,13 @@ class TestManager(object):
 class MantidFrameworkConfig:
     def __init__(self,
                  sourceDir=None,
-                 test_sub_dir="",
                  data_dirs="",
                  save_dir="",
                  loglevel='information',
                  archivesearch=False):
         self.__sourceDir = self.__locateSourceDir(sourceDir)
 
-        self.__testSubDir = test_sub_dir
-
-        # add location of system tests
-        self.__testDir = self.__locateTestsDir()
-
-        # add location of the tests to the system path
-        sys.path.insert(0, self.__testDir)
+        self.__testDir = ""
 
         # setup the rest of the magic directories
         self.__saveDir = save_dir
@@ -1116,8 +1109,8 @@ class MantidFrameworkConfig:
         else:
             raise RuntimeError("Failed to find source directory")
 
-    def __locateTestsDir(self):
-        loc = os.path.join(self.__sourceDir, "..", "..", "tests", self.__testSubDir)
+    def __locateTestsDir(self, sub_directory):
+        loc = os.path.join(self.__sourceDir, "..", "..", "tests", sub_directory)
         loc = os.path.abspath(loc)
         if os.path.isdir(loc):
             return loc
@@ -1139,11 +1132,9 @@ class MantidFrameworkConfig:
     testDir = property(lambda self: self.__testDir)
     dataDir = property(lambda self: self.__dataDirs)
 
-    def setTestSubDirectory(self, sub_directory):
-        self.__testSubDir = sub_directory
-
+    def setTestDirectory(self, sub_directory):
         # add location of system tests
-        self.__testDir = self.__locateTestsDir()
+        self.__testDir = self.__locateTestsDir(sub_directory)
 
         # add location of the tests to the system path
         sys.path.insert(0, self.__testDir)
