@@ -1,0 +1,54 @@
+# Mantid RAG Database Configuration
+
+# Embedding Model Configuration
+embedding:
+  model_name: "all-MiniLM-L6-v2"  # Fast, 384 dimensions
+  # Alternative: "all-mpnet-base-v2"  # Better quality, 768 dimensions
+  dimension: 384
+  batch_size: 32
+  normalize: true
+
+# FAISS Index Configuration
+faiss:
+  index_type: "IndexFlatIP"  # Inner product (cosine similarity with normalized vectors)
+  # For larger datasets, consider: "IndexIVFFlat" or "IndexHNSWFlat"
+  metric: "cosine"
+
+# Database Configuration
+database:
+  output_dir: "database"
+  schema_file: "config/schema.sql"
+
+# Extraction Configuration
+extraction:
+  data_dir: "data"
+  include_deprecated: true
+  max_properties_per_algorithm: 50
+
+# Query Configuration
+query:
+  default_top_k: 5
+  max_context_length: 4000  # characters
+  default_search_type: "hybrid"  # 'vector', 'graph', or 'hybrid'
+  
+# LLM Configuration
+llm:
+  default_adapter: "qwen"
+  default_max_tokens: 1024
+  default_temperature: 0.7
+  
+  # Qwen settings
+  qwen:
+    model_path: "Qwen/Qwen2.5-7B-Instruct"
+    device_map: "auto"
+    torch_dtype: "auto"
+  
+  # Ollama settings  
+  ollama:
+    base_url: "http://localhost:11434"
+    model_name: "qwen2.5:7b"
+
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

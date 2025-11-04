@@ -1,0 +1,128 @@
+[project]
+name = "mantid-rag"
+version = "0.1.0"
+description = "RAG database system for Mantid algorithms with FAISS vector search and graph relationships"
+authors = ["Mantid Development Team"]
+channels = ["conda-forge", "pytorch"]
+platforms = ["linux-64", "osx-64", "osx-arm64", "win-64"]
+
+[dependencies]
+# Core Python
+python = ">=3.9,<3.13"
+
+# Vector search and embeddings
+sentence-transformers = ">=2.2.0"
+faiss-cpu = ">=1.7.4"  # Use faiss-gpu in gpu feature if needed
+
+# Graph and data structures
+networkx = ">=3.0"
+numpy = ">=1.24.0"
+scipy = ">=1.10.0"
+
+# Data handling
+pandas = ">=2.0.0"
+pyyaml = ">=6.0"
+tqdm = ">=4.65.0"
+click = ">=8.1.0"
+
+# Documentation parsing
+docutils = ">=0.19"
+beautifulsoup4 = ">=4.12.0"
+lxml = ">=4.9.0"
+
+# LLM integration (transformers)
+transformers = ">=4.35.0"
+pytorch = ">=2.0.0"
+tokenizers = ">=0.15.0"
+
+# Utilities
+requests = ">=2.31.0"
+
+[feature.dev.dependencies]
+# Development tools
+pytest = ">=7.4.0"
+pytest-cov = ">=4.1.0"
+black = ">=23.0.0"
+ruff = ">=0.1.0"  # Modern linter, faster than flake8
+mypy = ">=1.5.0"
+ipython = ">=8.12.0"
+jupyter = ">=1.0.0"
+
+# Note: GPU acceleration via faiss-gpu is not available on conda-forge for Mac/Windows
+# On Mac, use default environment with faiss-cpu (which can use Metal acceleration)
+# On Linux, manually install faiss-gpu from other sources if needed
+
+[feature.viz.dependencies]
+# Visualization tools
+matplotlib = ">=3.7.0"
+seaborn = ">=0.12.0"
+plotly = ">=5.17.0"
+
+[feature.server.dependencies]
+# API server for remote querying
+fastapi = ">=0.104.0"
+uvicorn = ">=0.24.0"
+pydantic = ">=2.0.0"
+
+# Environment definitions
+[environments]
+# Default environment (core dependencies only)
+default = { solve-group = "default" }
+
+# Development environment (includes dev tools)
+dev = { features = ["dev"], solve-group = "default" }
+
+# Full environment (all features)
+full = { features = ["dev", "viz", "server"], solve-group = "default" }
+
+# Task definitions (like npm scripts)
+[tasks]
+# Database building tasks
+extract = "python extraction/extract_all_algorithms.py"
+parse-docs = "python extraction/parse_all_docs.py"
+build-relationships = "python extraction/build_all_relationships.py"
+build-db = "python ingestion/build_database.py"
+
+# Quick extraction (all 3 steps)
+extract-all = { depends-on = ["extract", "parse-docs", "build-relationships"] }
+
+# Clean generated files
+clean = "bash -c 'rm -rf data/; rm -f database/*.db database/*.faiss database/*.pkl 2>/dev/null || true'"
+
+# Show available tasks
+list-tasks = "pixi task list"
+
+# Testing tasks
+test = "pytest tests/"
+test-cov = "pytest --cov=. --cov-report=html tests/"
+test-integration = "pytest tests/test_integration.py -v"
+
+# Code quality tasks
+format = "black ."
+format-check = "black --check ."
+lint = "ruff check ."
+lint-fix = "ruff check --fix ."
+typecheck = "mypy extraction ingestion query update"
+
+# Convenience tasks
+setup = { depends-on = ["install"] }
+check = { depends-on = ["format-check", "lint", "typecheck", "test"] }
+
+# Full pipeline task
+build-full = { cmd = "bash scripts/build_full_database.sh", depends-on = ["extract", "parse-docs", "build-relationships", "build-db"] }
+
+# Server tasks (when server feature is enabled)
+serve = "uvicorn query.api:app --reload --host 0.0.0.0 --port 8000"
+
+# Documentation tasks
+docs-stats = "python scripts/export_statistics.py"
+docs-test = "python scripts/test_retrieval.py"
+
+[target.linux-64.dependencies]
+# Linux-specific optimizations if needed
+
+[target.osx-arm64.dependencies]
+# Apple Silicon optimizations if needed
+
+[target.win-64.dependencies]
+# Windows-specific dependencies if needed
