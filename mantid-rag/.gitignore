@@ -69,6 +69,7 @@ database/*.faiss
 database/*.pkl
 database/*.json
 data/
+test_data/
 *.jsonl
 
 # Temporary files
