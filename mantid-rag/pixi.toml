@@ -48,10 +48,9 @@ mypy = ">=1.5.0"
 ipython = ">=8.12.0"
 jupyter = ">=1.0.0"
 
-[feature.gpu.dependencies]
-# GPU acceleration (Linux only - not available on Mac or Windows via conda-forge)
-# Note: On Mac, use default environment with faiss-cpu (which can use Metal acceleration)
-# Note: On Linux, manually install faiss-gpu from other sources if needed
+# Note: GPU acceleration via faiss-gpu is not available on conda-forge for Mac/Windows
+# On Mac, use default environment with faiss-cpu (which can use Metal acceleration)
+# On Linux, manually install faiss-gpu from other sources if needed
 
 [feature.viz.dependencies]
 # Visualization tools
@@ -73,10 +72,7 @@ default = { solve-group = "default" }
 # Development environment (includes dev tools)
 dev = { features = ["dev"], solve-group = "default" }
 
-# GPU environment (Linux only - currently disabled, use default on Mac/Windows)
-# gpu = { features = ["gpu"], solve-group = "gpu" }
-
-# Full environment (all features except GPU)
+# Full environment (all features)
 full = { features = ["dev", "viz", "server"], solve-group = "default" }
 
 # Task definitions (like npm scripts)
@@ -89,6 +85,9 @@ build-db = "python ingestion/build_database.py"
 
 # Quick extraction (all 3 steps)
 extract-all = { depends-on = ["extract", "parse-docs", "build-relationships"] }
+
+# Clean generated files
+clean = "rm -rf data/ database/*.db database/*.faiss database/*.pkl"
 
 # Show available tasks
 list-tasks = "pixi task list"
