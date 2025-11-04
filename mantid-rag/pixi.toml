@@ -81,13 +81,17 @@ full = { features = ["dev", "viz", "server"], solve-group = "default" }
 
 # Task definitions (like npm scripts)
 [tasks]
-# Database building tasks
-extract = "python extraction/extract_all_algorithms.py"
+# Database building tasks (using enhanced extraction with properties)
+extract = "python extraction/extract_enhanced.py"
 parse-docs = "python extraction/parse_all_docs.py"
-build-relationships = "python extraction/build_all_relationships.py"
+build-relationships = "python extraction/build_enhanced_relationships.py"
 build-db = "python ingestion/build_database.py"
 
-# Quick extraction (all 3 steps)
+# Legacy extraction (basic, without properties)
+extract-basic = "python extraction/extract_all_algorithms.py"
+build-relationships-basic = "python extraction/build_all_relationships.py"
+
+# Quick extraction (all 3 steps with enhanced extraction)
 extract-all = { depends-on = ["extract", "parse-docs", "build-relationships"] }
 
 # Show available tasks
