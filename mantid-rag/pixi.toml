@@ -49,9 +49,9 @@ ipython = ">=8.12.0"
 jupyter = ">=1.0.0"
 
 [feature.gpu.dependencies]
-# GPU acceleration
-faiss-gpu = ">=1.7.4"
-pytorch-cuda = "12.1.*"
+# GPU acceleration (Linux only - not available on Mac or Windows via conda-forge)
+# Note: On Mac, use default environment with faiss-cpu (which can use Metal acceleration)
+# Note: On Linux, manually install faiss-gpu from other sources if needed
 
 [feature.viz.dependencies]
 # Visualization tools
@@ -73,10 +73,10 @@ default = { solve-group = "default" }
 # Development environment (includes dev tools)
 dev = { features = ["dev"], solve-group = "default" }
 
-# GPU environment (for GPU-accelerated embedding/search)
-gpu = { features = ["gpu"], solve-group = "gpu" }
+# GPU environment (Linux only - currently disabled, use default on Mac/Windows)
+# gpu = { features = ["gpu"], solve-group = "gpu" }
 
-# Full environment (all features)
+# Full environment (all features except GPU)
 full = { features = ["dev", "viz", "server"], solve-group = "default" }
 
 # Task definitions (like npm scripts)
@@ -100,11 +100,11 @@ lint-fix = "ruff check --fix ."
 typecheck = "mypy extraction ingestion query update"
 
 # Convenience tasks
-setup = { depends_on = ["install"] }
-check = { depends_on = ["format-check", "lint", "typecheck", "test"] }
+setup = { depends-on = ["install"] }
+check = { depends-on = ["format-check", "lint", "typecheck", "test"] }
 
 # Full pipeline task
-build-full = { cmd = "bash scripts/build_full_database.sh", depends_on = ["extract", "parse-docs", "build-relationships", "build-db"] }
+build-full = { cmd = "bash scripts/build_full_database.sh", depends-on = ["extract", "parse-docs", "build-relationships", "build-db"] }
 
 # Server tasks (when server feature is enabled)
 serve = "uvicorn query.api:app --reload --host 0.0.0.0 --port 8000"
