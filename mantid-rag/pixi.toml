@@ -87,7 +87,7 @@ build-db = "python ingestion/build_database.py"
 extract-all = { depends-on = ["extract", "parse-docs", "build-relationships"] }
 
 # Clean generated files
-clean = "rm -rf data/ database/*.db database/*.faiss database/*.pkl"
+clean = "bash -c 'rm -rf data/; rm -f database/*.db database/*.faiss database/*.pkl 2>/dev/null || true'"
 
 # Show available tasks
 list-tasks = "pixi task list"
